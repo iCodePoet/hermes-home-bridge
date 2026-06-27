@@ -78,9 +78,10 @@ sequenceDiagram
 * Monitors the local USB serial port using `pyserial`.
 * The `--once` flag opens the connection, captures the first valid temperature/humidity packet from the board, prints the standard JSON format to stdout, and exits.
 
-### 2. Hermes Custom Skill (`hermes_home_bridge`)
-* **Path**: `~/.silas/skills/hermes_home_bridge/SKILL.md` (or `.agents/skills/hermes_home_bridge/SKILL.md` in agent workspace)
-* Teaches the agent context clues (NLP) and configures the host command execution: `uv run src/serial_bridge.py --once`.
+### 2. Hermes Custom Skill Template (`SKILL.md`)
+* **Path**: `skills/hermes_home_bridge/SKILL.md`
+* A declarative template to register this bridge to your Hermes Agent.
+* Defines context clues (NLP) and configures the host command execution: `uv run src/serial_bridge.py --once`.
 
 ---
 
@@ -104,7 +105,20 @@ SERIAL_PORT=/dev/cu.usbmodem113401 # (macOS)
 BAUD_RATE=9600
 ```
 
-### 3. Read Sensor Data Manually
+### 3. Register the Custom Skill to your Hermes Agent
+Copy the `SKILL.md` file from this project repository to your Hermes Agent's local skill folder:
+```bash
+# For standard Hermes installation:
+mkdir -p ~/.hermes/skills/hermes_home_bridge
+cp skills/hermes_home_bridge/SKILL.md ~/.hermes/skills/hermes_home_bridge/SKILL.md
+
+# For Silas installation (if customized):
+mkdir -p ~/.silas/skills/hermes_home_bridge
+cp skills/hermes_home_bridge/SKILL.md ~/.silas/skills/hermes_home_bridge/SKILL.md
+```
+Then, restart your Hermes Agent/Docker container to load the new skill.
+
+### 4. Read Sensor Data Manually
 ```bash
 uv run src/serial_bridge.py --once
 ```

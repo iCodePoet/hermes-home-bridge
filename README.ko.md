@@ -78,9 +78,10 @@ sequenceDiagram
 * `pyserial`을 사용하여 로컬의 USB 시리얼 포트를 모니터링합니다.
 * `--once` 옵션을 주어 실행 시 아두이노가 보내는 최초 10라인 중 성공적으로 읽어들인 온습도 데이터 1패킷만 추출하여 JSON 표준 스트링으로 출력 후 자동 종료됩니다.
 
-### 2. Hermes Custom Skill (`hermes_home_bridge`)
-* **경로**: `~/.silas/skills/hermes_home_bridge/SKILL.md` (또는 에이전트 실행 디렉토리 하위 `.agents/skills/hermes_home_bridge/SKILL.md`)
-* 에이전트에게 "언제 이 도구를 써야 하는지(When to Use)" 자연어 예제를 가르치고, 매칭 시 실행해야 할 호스트 명령어(`uv run src/serial_bridge.py --once`)를 명세합니다.
+### 2. Hermes Custom Skill 템플릿 (`SKILL.md`)
+* **경로**: `skills/hermes_home_bridge/SKILL.md` (프로젝트 내부 경로)
+* 이 브릿지를 본인의 Hermes Agent에 등록하기 위한 선언형 템플릿 파일입니다.
+* 자연어 매칭 규칙 및 호스트 실행 명령어(`uv run src/serial_bridge.py --once`)를 명세하고 있습니다.
 
 ---
 
@@ -104,7 +105,20 @@ SERIAL_PORT=/dev/cu.usbmodem113401 # (macOS 예시)
 BAUD_RATE=9600
 ```
 
-### 3. 1회성 데이터 수동 조회 테스트
+### 3. Hermes Agent에 커스텀 스킬 등록
+이 프로젝트 내의 `skills/hermes_home_bridge/SKILL.md` 파일을 복사하여 본인의 Hermes Agent 스킬 폴더 경로에 붙여넣어 줍니다.
+```bash
+# 기본 설치된 Hermes Agent 경로:
+mkdir -p ~/.hermes/skills/hermes_home_bridge
+cp skills/hermes_home_bridge/SKILL.md ~/.hermes/skills/hermes_home_bridge/SKILL.md
+
+# Silas 커스텀 빌드 경로:
+mkdir -p ~/.silas/skills/hermes_home_bridge
+cp skills/hermes_home_bridge/SKILL.md ~/.silas/skills/hermes_home_bridge/SKILL.md
+```
+복사 후 변경 사항을 로드하기 위해 Hermes Agent/Docker 컨테이너를 재시작해 줍니다.
+
+### 4. 1회성 데이터 수동 조회 테스트
 ```bash
 uv run src/serial_bridge.py --once
 ```
@@ -123,4 +137,4 @@ uv run src/serial_bridge.py --once
 
 ### 2. 에어컨 적외선(IR) 제어로의 확장
 * 에이전트가 "에어컨을 켜라"고 판단하면, PC 쉘 도구를 사용해 `uv run src/serial_bridge.py --send-ir AC_ON` 형태의 파라미터 명령을 실행하도록 확장할 수 있습니다.
-* `src/serial_bridge.py`가 시리얼 포트를 열어 아두이노에게 해당 트리거 문자를 전송하면 아두이노에 장착된 IR 송신 모듈이 에어컨 가동 신호를 송출하게 됩니다.
+* `src/serial_bridge.py`가 시리얼 포트를 열어 아두이노에게 해당 트리거 문자가 전송하면 아두이노에 장착된 IR 송신 모듈이 에어컨 가동 신호를 송출하게 됩니다.
