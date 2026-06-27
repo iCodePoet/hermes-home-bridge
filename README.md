@@ -54,13 +54,13 @@ sequenceDiagram
     actor User as User
     participant Discord as Discord Channel
     participant Hermes as Hermes Agent (Docker)
-    participant PC as Host PC (src/bridge.py)
+    participant PC as Host PC (src/serial_bridge.py)
     participant Board as Microcontroller Board
 
     User->>Discord: "What is the room temperature?"
     Discord->>Hermes: Pass prompt (NLP)
     Note over Hermes: Match prompt with rule in<br/>hermes_home_bridge SKILL.md
-    Hermes->>PC: Execute 'uv run src/bridge.py --once' (Host Shell)
+    Hermes->>PC: Execute 'uv run src/serial_bridge.py --once' (Host Shell)
     PC->>Board: Open USB Serial connection & wait
     Board-->>PC: Output "Temperature: 27.30 *C Humidity: 7.00 %"
     PC-->>Hermes: Send {"temperature": 27.30, "humidity": 7.00} (JSON)
@@ -68,6 +68,19 @@ sequenceDiagram
     Hermes->>Discord: "The current room temperature is 27.3°C with 7% humidity."
     Discord->>User: Display message
 ```
+
+---
+
+## 🛠️ Summary of Files (Implementation)
+
+### 1. Python Serial Bridge Script (`serial_bridge.py`)
+* **Path**: `src/serial_bridge.py`
+* Monitors the local USB serial port using `pyserial`.
+* The `--once` flag opens the connection, captures the first valid temperature/humidity packet from the board, prints the standard JSON format to stdout, and exits.
+
+### 2. Hermes Custom Skill (`hermes_home_bridge`)
+* **Path**: `~/.silas/skills/hermes_home_bridge/SKILL.md` (or `.agents/skills/hermes_home_bridge/SKILL.md` in agent workspace)
+* Teaches the agent context clues (NLP) and configures the host command execution: `uv run src/serial_bridge.py --once`.
 
 ---
 
@@ -93,7 +106,7 @@ BAUD_RATE=9600
 
 ### 3. Read Sensor Data Manually
 ```bash
-uv run src/bridge.py --once
+uv run src/serial_bridge.py --once
 ```
 
 ---
@@ -109,5 +122,5 @@ uv run src/bridge.py --once
   ```
 
 ### 2. Actuator Expansion (AC Remote Control)
-* Since the bridge communicates bi-directionally via USB Serial, you can extend the CLI to support writing control codes (e.g., `uv run src/bridge.py --send-ir AC_ON`).
+* Since the bridge communicates bi-directionally via USB Serial, you can extend the CLI to support writing control codes (e.g., `uv run src/serial_bridge.py --send-ir AC_ON`).
 * The Python script will write the trigger code to the serial bus, instructing the board to fire an connected IR transmitter module to command your air conditioner.

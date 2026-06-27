@@ -54,13 +54,13 @@ sequenceDiagram
     actor User as 사용자
     participant Discord as Discord 채널
     participant Hermes as Hermes Agent (Docker)
-    participant PC as Host PC (src/bridge.py)
+    participant PC as Host PC (src/serial_bridge.py)
     participant Board as 마이크로컨트롤러 보드
 
     User->>Discord: "현재 방 온도 몇이야?"
     Discord->>Hermes: 질문(자연어) 전달
     Note over Hermes: hermes_home_bridge SKILL.md 규칙에 따라<br/>해당 스킬 실행 매칭
-    Hermes->>PC: 'uv run src/bridge.py --once' 실행 (로컬 쉘)
+    Hermes->>PC: 'uv run src/serial_bridge.py --once' 실행 (로컬 쉘)
     PC->>Board: USB Serial 연결 오픈 및 데이터 대기
     Board-->>PC: "Temperature: 27.30 *C Humidity: 7.00 %" 출력
     PC-->>Hermes: {"temperature": 27.30, "humidity": 7.00} (JSON)
@@ -73,14 +73,14 @@ sequenceDiagram
 
 ## 🛠️ 구현 내용 (Implementation Details)
 
-### 1. Python Bridge Script (`bridge.py`)
-* **경로**: `src/bridge.py`
+### 1. Python Serial Bridge Script (`serial_bridge.py`)
+* **경로**: `src/serial_bridge.py`
 * `pyserial`을 사용하여 로컬의 USB 시리얼 포트를 모니터링합니다.
 * `--once` 옵션을 주어 실행 시 아두이노가 보내는 최초 10라인 중 성공적으로 읽어들인 온습도 데이터 1패킷만 추출하여 JSON 표준 스트링으로 출력 후 자동 종료됩니다.
 
-### 2. Hermes Custom Skill (`room_monitor`)
+### 2. Hermes Custom Skill (`hermes_home_bridge`)
 * **경로**: `~/.silas/skills/hermes_home_bridge/SKILL.md` (또는 에이전트 실행 디렉토리 하위 `.agents/skills/hermes_home_bridge/SKILL.md`)
-* 에이전트에게 "언제 이 도구를 써야 하는지(When to Use)" 자연어 예제를 가르치고, 매칭 시 실행해야 할 호스트 명령어(`uv run src/bridge.py --once`)를 명세합니다.
+* 에이전트에게 "언제 이 도구를 써야 하는지(When to Use)" 자연어 예제를 가르치고, 매칭 시 실행해야 할 호스트 명령어(`uv run src/serial_bridge.py --once`)를 명세합니다.
 
 ---
 
@@ -106,7 +106,7 @@ BAUD_RATE=9600
 
 ### 3. 1회성 데이터 수동 조회 테스트
 ```bash
-uv run src/bridge.py --once
+uv run src/serial_bridge.py --once
 ```
 
 ---
@@ -122,5 +122,5 @@ uv run src/bridge.py --once
   ```
 
 ### 2. 에어컨 적외선(IR) 제어로의 확장
-* 에이전트가 "에어컨을 켜라"고 판단하면, PC 쉘 도구를 사용해 `uv run src/bridge.py --send-ir AC_ON` 형태의 파라미터 명령을 실행하도록 확장할 수 있습니다.
-* `src/bridge.py`가 시리얼 포트를 열어 아두이노에게 해당 트리거 문자를 전송하면 아두이노에 장착된 IR 송신 모듈이 에어컨 가동 신호를 송출하게 됩니다.
+* 에이전트가 "에어컨을 켜라"고 판단하면, PC 쉘 도구를 사용해 `uv run src/serial_bridge.py --send-ir AC_ON` 형태의 파라미터 명령을 실행하도록 확장할 수 있습니다.
+* `src/serial_bridge.py`가 시리얼 포트를 열어 아두이노에게 해당 트리거 문자를 전송하면 아두이노에 장착된 IR 송신 모듈이 에어컨 가동 신호를 송출하게 됩니다.
