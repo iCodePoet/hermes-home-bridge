@@ -1,0 +1,11 @@
+[project]
+name = "hermes-home-bridge"
+version = "0.1.0"
+description = "A lightweight bridge between local hardware (Arduino/DHT sensors) and the Hermes Agent API for smart home monitoring and control."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pyserial>=3.5",
+    "python-dotenv>=1.2.2",
+    "requests>=2.34.2",
+]
